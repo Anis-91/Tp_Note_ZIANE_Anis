@@ -1,5 +1,5 @@
 <?php
-// reset_mdp.php - Réinitialisation du mot de passe
+// reset_mdp.php - Réinitialisation du mot de passe avec Debug SMTP complet
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/fonctions.php';
@@ -31,15 +31,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':id'    => $user['id']
             ]);
 
-            // Configuration PHPMailer avec le SMTP UGE ou variables d'environnement
+            $mail = new PHPMailer(true);
             try {
-                $mail = new PHPMailer(true);
+                // Activation des traces de débogage SMTP (0 = off, 1 = client, 2 = client+serveur)
+                $mail->SMTPDebug = 2;
+                $mail->Debugoutput = 'html';
+
                 $mail->isSMTP();
-                // Hôte SMTP UGE (intranet) ou fallback configurable
                 $mail->Host       = $_ENV['SMTP_HOST'] ?? 'smtp.univ-eiffel.fr';
-                $mail->SMTPAuth   = false; // Le serveur SMTP UGE en intranet ne nécessite généralement pas d'auth
+                $mail->SMTPAuth   = false;
                 $mail->Port       = (int) ($_ENV['SMTP_PORT'] ?? 25);
-                $mail->Timeout    = 3; // Timeout de 3s pour ne pas bloquer l'interface
+                $mail->Timeout    = 5;
                 $mail->CharSet    = 'UTF-8';
 
                 $mail->setFrom('no-reply@univ-eiffel.fr', 'Snake Online - UGE');
@@ -51,13 +53,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mail->Subject = 'Snake Online - Reinitialisation du mot de passe';
                 $mail->Body    = "Pour réinitialiser votre mot de passe, cliquez ici : <a href='{$lien}'>{$lien}</a>";
 
-                $mail->send();
+                echo "<div style='background:#111; color:#0f0; padding:15px; font-family:monospace; margin-bottom:20px;'>";
+                echo "<h3>--- TRACE SMTP DEBUG ---</h3>";
+                
+                // Exécution et test explicite du résultat avec var_dump
+                $resulEnvoi = $mail->send();
+                
+                echo "<h4>Résultat de \$mail->send() :</h4>";
+                var_dump($resulEnvoi);
+                echo "</div>";
+
             } catch (Exception $e) {
-                error_log("Notification SMTP : " . $e->getMessage());
+                echo "<div style='background:#300; color:#ff8888; padding:15px; font-family:monospace; margin-bottom:20px;'>";
+                echo "<h3>--- ERREUR CATCHEE ---</h3>";
+                echo "<h4>Var dump d'exception (\$e) :</h4>";
+                var_dump($e->getMessage());
+                echo "<h4>Var dump de \$mail->ErrorInfo :</h4>";
+                var_dump($mail->ErrorInfo);
+                echo "</div>";
             }
         }
 
-        // Réponse utilisateur immédiate (sécurité : pas d'énumération d'emails)
         $message = "Si cette adresse existe, un mail vient d'être envoyé.";
     }
 }
