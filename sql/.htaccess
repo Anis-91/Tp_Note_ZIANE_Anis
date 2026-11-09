@@ -1,7 +1,2 @@
-sql/
-.env
-.env.local
-.git/
-.github/
-*.md
-.vscode/
+# sql/.htaccess - refuse tout accès web à ce dossier
+Require all denied
