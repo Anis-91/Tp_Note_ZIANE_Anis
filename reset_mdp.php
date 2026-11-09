@@ -1,4 +1,5 @@
 <?php
+// reset_mdp.php - Réinitialisation du mot de passe
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/fonctions.php';
@@ -30,8 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':id'    => $user['id']
             ]);
 
-            $mail = new PHPMailer(true);
+            // Tentative d'envoi SMTP avec un Timeout court pour éviter de faire ramer la page
             try {
+                $mail = new PHPMailer(true);
                 $mail->isSMTP();
                 $mail->Host       = $_ENV['SMTP_HOST'] ?? 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
@@ -39,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mail->Password   = $_ENV['SMTP_PASS'] ?? '';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = (int) ($_ENV['SMTP_PORT'] ?? 587);
+                $mail->Timeout    = 3; // Limite l'attente à 3 secondes max !
                 $mail->CharSet    = 'UTF-8';
 
                 $mail->setFrom('anisziane7@gmail.com', 'Snake Online');
@@ -52,10 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $mail->send();
             } catch (Exception $e) {
-                error_log("Erreur SMTP : " . $mail->ErrorInfo);
+                // Si SMTP échoue ou prend trop de temps, on enregistre dans les logs sans bloquer l'utilisateur
+                error_log("Erreur/Timeout SMTP : " . $e->getMessage());
             }
         }
 
+        // Réponse immédiate pour l'utilisateur
         $message = "Si cette adresse existe, un mail vient d'être envoyé.";
     }
 }
