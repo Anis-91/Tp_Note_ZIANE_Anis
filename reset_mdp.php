@@ -31,20 +31,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':id'    => $user['id']
             ]);
 
-            // Tentative d'envoi SMTP avec un Timeout court pour éviter de faire ramer la page
+            // Configuration PHPMailer avec le SMTP UGE ou variables d'environnement
             try {
                 $mail = new PHPMailer(true);
                 $mail->isSMTP();
-                $mail->Host       = $_ENV['SMTP_HOST'] ?? 'smtp.gmail.com';
-                $mail->SMTPAuth   = true;
-                $mail->Username   = $_ENV['SMTP_USER'] ?? 'anisziane7@gmail.com';
-                $mail->Password   = $_ENV['SMTP_PASS'] ?? '';
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port       = (int) ($_ENV['SMTP_PORT'] ?? 587);
-                $mail->Timeout    = 3; // Limite l'attente à 3 secondes max !
+                // Hôte SMTP UGE (intranet) ou fallback configurable
+                $mail->Host       = $_ENV['SMTP_HOST'] ?? 'smtp.univ-eiffel.fr';
+                $mail->SMTPAuth   = false; // Le serveur SMTP UGE en intranet ne nécessite généralement pas d'auth
+                $mail->Port       = (int) ($_ENV['SMTP_PORT'] ?? 25);
+                $mail->Timeout    = 3; // Timeout de 3s pour ne pas bloquer l'interface
                 $mail->CharSet    = 'UTF-8';
 
-                $mail->setFrom('anisziane7@gmail.com', 'Snake Online');
+                $mail->setFrom('no-reply@univ-eiffel.fr', 'Snake Online - UGE');
                 $mail->addAddress($email);
 
                 $lien = "https://tp-note-ziane-anis.onrender.com/nouveau_mdp.php?token=" . $token;
@@ -55,12 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $mail->send();
             } catch (Exception $e) {
-                // Si SMTP échoue ou prend trop de temps, on enregistre dans les logs sans bloquer l'utilisateur
-                error_log("Erreur/Timeout SMTP : " . $e->getMessage());
+                error_log("Notification SMTP : " . $e->getMessage());
             }
         }
 
-        // Réponse immédiate pour l'utilisateur
+        // Réponse utilisateur immédiate (sécurité : pas d'énumération d'emails)
         $message = "Si cette adresse existe, un mail vient d'être envoyé.";
     }
 }
@@ -69,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Snake - Mot de passe oublié</title>
+    <title>🐍 Snake Online - Mot de passe oublié</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -89,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" action="reset_mdp.php">
             <div class="form-group">
                 <label for="email">Votre adresse e-mail</label>
-                <input type="email" id="email" name="email" required placeholder="exemple@mail.fr">
+                <input type="email" id="email" name="email" required placeholder="étudiant@etu.univ-eiffel.fr">
             </div>
             <button type="submit">Envoyer</button>
         </form>
