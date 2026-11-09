@@ -31,14 +31,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':id'    => $user['id']
             ]);
 
-            // Configuration PHPMailer conforme au sujet (SMTP UGE)
             $mail = new PHPMailer(true);
             try {
                 $mail->isSMTP();
-                $mail->Host       = $_ENV['SMTP_HOST'] ?? 'smtp.univ-eiffel.fr';
+                // Utilisation du serveur SMTP effectif de l'université (univ-mlv.fr)
+                $mail->Host       = $_ENV['SMTP_HOST'] ?? 'smtp.univ-mlv.fr';
                 $mail->SMTPAuth   = false;
                 $mail->Port       = (int) ($_ENV['SMTP_PORT'] ?? 25);
-                $mail->Timeout    = 3;
+                $mail->Timeout    = 5;
                 $mail->CharSet    = 'UTF-8';
 
                 $mail->setFrom('no-reply@univ-eiffel.fr', 'Snake Online - UGE');
@@ -50,18 +50,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mail->Subject = 'Snake Online - Reinitialisation du mot de passe';
                 $mail->Body    = "Pour réinitialiser votre mot de passe, cliquez ici : <a href='{$lien}'>{$lien}</a>";
 
-                // Envoi avec capture de statut
+                // Test explicite du retour de send()
                 if ($mail->send()) {
-                    error_log("Mail de réinitialisation envoyé avec succès à " . $email);
+                    error_log("E-mail envoyé avec succès à " . $email);
+                } else {
+                    error_log("Échec lors de l'envoi de l'e-mail.");
                 }
             } catch (Exception $e) {
-                // Le nom du serveur SMTP UGE est uniquement résoluble en Intranet UGE.
-                // L'exception est interceptée proprement pour conserver une réponse uniforme (sécurité SSI).
-                error_log("Note SMTP Intranet UGE : " . $e->getMessage());
+                error_log("Erreur SMTP : " . $e->getMessage());
             }
         }
 
-        // Réponse constante (principe SSI : pas d'énumération d'utilisateurs)
+        // Message uniforme (sécurité contre l'énumération d'utilisateurs)
         $message = "Si cette adresse existe, un mail vient d'être envoyé.";
     }
 }
