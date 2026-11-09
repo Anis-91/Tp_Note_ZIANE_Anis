@@ -1,0 +1,5 @@
+### Formulaire de connexion — requête normale
+POST http://localhost:8000/connexion.php
+Content-Type: application/x-www-form-urlencoded
+
+email=victime@example.test&mot_de_passe=MotDePasse-Solide-2026!
