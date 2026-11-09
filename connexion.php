@@ -56,27 +56,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Connexion - Isoculture</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐍 Snake Online - Connexion</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Connexion</h1>
-
-    <?php if ($erreur !== null): ?>
-        <p style="color: red;"><?= e($erreur) ?></p>
-    <?php endif; ?>
-
-    <form method="POST" action="connexion.php">
-        <div>
-            <label for="email">Adresse e-mail :</label>
-            <input type="email" id="email" name="email" required value="<?= e($_POST['email'] ?? '') ?>">
+    <div class="container">
+        <div class="header-brand">
+            <h1>🐍 SNAKE</h1>
+            <p>Jeu Snake multijoueur en ligne</p>
         </div>
-        <div>
-            <label for="mot_de_passe">Mot de passe :</label>
-            <input type="password" id="mot_de_passe" name="mot_de_passe" required>
-        </div>
-        <div>
+
+        <?php if ($erreur !== null): ?>
+            <div class="alert alert-danger"><?= e($erreur) ?></div>
+        <?php endif; ?>
+
+        <form method="POST" action="connexion.php">
+            <div class="form-group">
+                <label for="email">Adresse e-mail :</label>
+                <input type="email" id="email" name="email" required value="<?= e($_POST['email'] ?? '') ?>">
+            </div>
+            <div class="form-group">
+                <label for="mot_de_passe">Mot de passe :</label>
+                <input type="password" id="mot_de_passe" name="mot_de_passe" required>
+            </div>
             <button type="submit">Se connecter</button>
+        </form>
+
+        <div class="links">
+            <a href="inscription.php">Créer un compte</a>
+            <a href="reset_mdp.php">Mot de passe oublié ?</a>
         </div>
-    </form>
+    </div>
 </body>
 </html>
