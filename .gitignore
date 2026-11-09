@@ -1,0 +1,9 @@
+# Configuration locale (contient les identifiants de connexion)
+.env
+.env.local
+
+# Base de données de développement
+sql/*.db
+
+# Dépendances installées par Composer
+/vendor/
